@@ -1,45 +1,58 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-var app = new CalculatorAppV1();
-app.Run();
+using System.Reflection;
+using Autofac;
+using Calc.Application;
+using Calc.Arithmetics;
+using Calc.Interfaces;
 
-class CalculatorAppV1
+new V4().Do();
+
+class V4
 {
-  public void Run()
+  public void Do()
   {
-    var needContinue = true;
-    do
+    var loader = new Loader();
+    var container = loader.BuildContainer();
+    var app = container.Resolve<IApplication>();
+    app.Run();
+  }
+
+  class Loader
+  {
+    public IContainer BuildContainer()
     {
-      Console.WriteLine("1. x + y");
-      Console.WriteLine("2. x - y");
-      Console.WriteLine("3. x * y");
-      Console.WriteLine("4. x / y");
-      var @operator = int.Parse(Console.ReadLine()!);
-      var left = double.Parse(Console.ReadLine()!);
-      var right = double.Parse(Console.ReadLine()!);
-      var result = @operator switch {
-        1 => left + right,
-        2 => left - right,
-        3 => left * right,
-        4 => left / right,
-        _ => throw new ApplicationException("The operation is not supported.")
-      };
+      var containerBuilder = new ContainerBuilder();
+      //containerBuilder.RegisterModule<ApplicationModule>();  // (!!!) Important
+      //containerBuilder.RegisterModule<ArithmeticsModule>();
+
+      LoadPlugins(containerBuilder);
       
-      Console.WriteLine(result);
-      Console.WriteLine("Calc smth else?");
-      needContinue = Console.ReadLine()?.ToLowerInvariant() is "yes" or "y";
-    } while (needContinue);
+      return containerBuilder.Build();
+    }
+    private void LoadPlugins(ContainerBuilder builder)
+    {
+      var dir = new FileInfo(GetType().Assembly.Location).Directory;
+      var dlls = dir.GetFiles("*.dll");
+      var asms = AppDomain.CurrentDomain.GetAssemblies();
+      foreach (var dll in dlls.Where(x => IsSuitable(x.FullName)))
+      {
+        var defaultContext = System.Runtime.Loader.AssemblyLoadContext.Default; // (!!!) Important
+        var loaded = asms.FirstOrDefault(x => x.Location.ToLowerInvariant() == dll.FullName.ToLowerInvariant());
+        if (loaded == null)
+        {
+          loaded = defaultContext.LoadFromAssemblyPath(dll.FullName);
+        }
+        builder.RegisterAssemblyModules(loaded);
+      }
+    }
+    private bool IsSuitable(string path)
+    {
+      var type = typeof(CalcPlugin);
+      var asm = Mono.Cecil.AssemblyDefinition.ReadAssembly(path); // (!!!) Important
+      return asm
+        .CustomAttributes
+        .Any (attribute => attribute.AttributeType.Name == type.Name && attribute.AttributeType.Namespace == type.Namespace);
+    }
   }
 }
-
-// Plugin Load
-// Interact with Host App
-//   - Provide some data
-//   - Add Behavior
-//   - Replace Behavior
-//   - Modify Behavior
-// Interact with other Plugins
-//   - Hard dependency - plugin requires another plugin
-//   - Soft dependence - plugin can use functions of other plugin but it is not required
-//   - via Host Interfaces
-//   - via Plugin Interfaces
