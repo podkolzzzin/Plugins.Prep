@@ -1,14 +1,17 @@
 using System.Composition;
 using Calc.Interfaces;
+using MediatR;
 
 namespace Calc.Application;
 
 internal class CalculatorApp : IApplication
 {
+  private readonly IMediator _mediator;
   private readonly ICalcAction[] _actions;
   private readonly IInputService _inputService;
-  public CalculatorApp(ICalcAction[] actions, IInputService inputService)
+  public CalculatorApp(IMediator mediator, ICalcAction[] actions, IInputService inputService)
   {
+    _mediator = mediator;
     _actions = actions;
     _inputService = inputService;
   }
@@ -26,7 +29,8 @@ internal class CalculatorApp : IApplication
       
       var @operator = int.Parse(Console.ReadLine()!);
 
-      var input = await _inputService.GetActionOperands(_actions[@operator]);
+      var action = _actions[@operator - 1];
+      var input = await _inputService.GetActionOperands(action);
       
 
       if (@operator > _actions.Length || @operator <= 0)
@@ -38,6 +42,9 @@ internal class CalculatorApp : IApplication
       Console.WriteLine(result);
       Console.WriteLine("Calc smth else?");
       needContinue = Console.ReadLine()?.ToLowerInvariant() is "yes" or "y";
+      
+      await _mediator.Publish(new CalculatedEvent(action, input));
+      
     } while (needContinue);
   }
 }

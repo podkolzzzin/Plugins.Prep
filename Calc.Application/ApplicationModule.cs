@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using Calc.Interfaces;
+using MediatR.Extensions.Autofac.DependencyInjection;
 
 [assembly: CalcPlugin]
 
@@ -16,6 +17,7 @@ public class ApplicationModule : Module
 
     builder.RegisterType<ConsoleFloatInputStrategy>()
       .AsImplementedInterfaces();
+    
     base.Load(builder);
   }
 }

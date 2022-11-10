@@ -5,6 +5,7 @@ using Autofac;
 using Calc.Application;
 using Calc.Arithmetics;
 using Calc.Interfaces;
+using MediatR.Extensions.Autofac.DependencyInjection;
 
 await new V4().Do();
 
@@ -44,6 +45,7 @@ class V4
           loaded = defaultContext.LoadFromAssemblyPath(dll.FullName);
         }
         builder.RegisterAssemblyModules(loaded);
+        builder.RegisterMediatR(loaded);
       }
     }
     private bool IsSuitable(string path)
