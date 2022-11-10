@@ -17,6 +17,9 @@ public class ApplicationModule : Module
 
     builder.RegisterType<ConsoleFloatInputStrategy>()
       .AsImplementedInterfaces();
+
+    builder.RegisterType<PropertyProvider>()
+      .AsImplementedInterfaces();
     
     base.Load(builder);
   }

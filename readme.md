@@ -15,4 +15,12 @@
   - Open/Closed Principle
   - Strategy
   - Decorator
-  - 
+
+# Script
+1. Calc APP with no chance to extend (V1)
+2. with interfaces
+3. with DI
+4. with plugin loading
+5. with Pow plugin
+6. with Decorator
+7. with

@@ -8,7 +8,7 @@ using Calc.Interfaces;
 
 namespace Calc.Pow;
 
-public class Pow : ICalcAction
+public class Pow : ICalcAction, IPropertyProvider<ICalcAction, string>
 {
   public float Execute(float left, float right) => (float)Math.Pow(left, right);
   
@@ -16,6 +16,14 @@ public class Pow : ICalcAction
   
   public ImmutableArray<OperandInfo> OperandInfo { get; } = new OperandInfo[] { new (typeof(float)), new (typeof(float)) }.ToImmutableArray();
   public string Description => "x ^ y";
+  public string GetProperty(string key, ICalcAction target)
+  {
+    return "{0} ^ {1}";
+  }
+  public bool HasProperty(string key, ICalcAction target)
+  {
+    return target is Pow && key == "ExtendedView";
+  }
 }
 
 public class PowModule : Module
@@ -23,7 +31,7 @@ public class PowModule : Module
   protected override void Load(ContainerBuilder builder)
   {
     builder.RegisterType<Pow>()
-      .As<ICalcAction>();
+      .AsImplementedInterfaces();
     base.Load(builder);
   }
 }
