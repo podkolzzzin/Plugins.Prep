@@ -11,6 +11,11 @@ public class ApplicationModule : Module
   {
     builder.RegisterType<CalculatorApp>()
       .As<IApplication>();
+    builder.RegisterType<ConsoleInputService>()
+      .As<IInputService>();
+
+    builder.RegisterType<ConsoleFloatInputStrategy>()
+      .AsImplementedInterfaces();
     base.Load(builder);
   }
 }

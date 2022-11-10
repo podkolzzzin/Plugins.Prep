@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <PackageReference Include="Autofac" Version="6.4.0" />
+      <PackageReference Include="System.Composition" Version="7.0.0" />
     </ItemGroup>
 
     <ItemGroup>

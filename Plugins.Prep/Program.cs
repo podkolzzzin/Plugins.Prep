@@ -6,16 +6,16 @@ using Calc.Application;
 using Calc.Arithmetics;
 using Calc.Interfaces;
 
-new V4().Do();
+await new V4().Do();
 
 class V4
 {
-  public void Do()
+  public async Task Do()
   {
     var loader = new Loader();
     var container = loader.BuildContainer();
     var app = container.Resolve<IApplication>();
-    app.Run();
+    await app.Run();
   }
 
   class Loader
@@ -48,11 +48,18 @@ class V4
     }
     private bool IsSuitable(string path)
     {
-      var type = typeof(CalcPlugin);
-      var asm = Mono.Cecil.AssemblyDefinition.ReadAssembly(path); // (!!!) Important
-      return asm
-        .CustomAttributes
-        .Any (attribute => attribute.AttributeType.Name == type.Name && attribute.AttributeType.Namespace == type.Namespace);
+      try
+      {
+        var type = typeof(CalcPlugin);
+        var asm = Mono.Cecil.AssemblyDefinition.ReadAssembly(path); // (!!!) Important
+        return asm
+          .CustomAttributes
+          .Any(attribute => attribute.AttributeType.Name == type.Name && attribute.AttributeType.Namespace == type.Namespace);
+      }
+      catch
+      {
+        return false;
+      }
     }
   }
 }

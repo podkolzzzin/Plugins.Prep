@@ -1,3 +1,4 @@
+using System.Composition;
 using Calc.Interfaces;
 
 namespace Calc.Application;
@@ -5,12 +6,14 @@ namespace Calc.Application;
 internal class CalculatorApp : IApplication
 {
   private readonly ICalcAction[] _actions;
-  public CalculatorApp(params ICalcAction[] actions)
+  private readonly IInputService _inputService;
+  public CalculatorApp(ICalcAction[] actions, IInputService inputService)
   {
     _actions = actions;
+    _inputService = inputService;
   }
 
-  public void Run()
+  public async Task Run()
   {
     var needContinue = true;
     do
@@ -20,15 +23,17 @@ internal class CalculatorApp : IApplication
         Console.WriteLine($"{i + 1}. {_actions[i].Description}");
       }
 
+      
       var @operator = int.Parse(Console.ReadLine()!);
-      var left = float.Parse(Console.ReadLine()!);
-      var right = float.Parse(Console.ReadLine()!);
+
+      var input = await _inputService.GetActionOperands(_actions[@operator]);
+      
 
       if (@operator > _actions.Length || @operator <= 0)
       {
         throw new ApplicationException("The operation is not supported.");
       }
-      var result = _actions[@operator - 1].Execute(left, right);
+      var result = _actions[@operator - 1].Execute(input);
 
       Console.WriteLine(result);
       Console.WriteLine("Calc smth else?");

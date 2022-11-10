@@ -9,3 +9,10 @@
   - Soft dependence - plugin can use functions of other plugin but it is not required
   - via Host Interfaces
   - via Plugin Interfaces
+#Tools
+  - Reflection
+  - DI (Autofac)
+  - Open/Closed Principle
+  - Strategy
+  - Decorator
+  - 
